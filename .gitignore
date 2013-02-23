@@ -4,4 +4,4 @@
 local_settings.py
 retrieved/*
 .DS_Store
-/pubmed_json/config/my_config.py
+*/config/my_config.py
