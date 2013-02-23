@@ -5,7 +5,7 @@ esearch function
 import json
 import urllib
 import pprint
-from entrez_settings import ENTREZ_UTIL_API_KEY, ENTREZ_URL_SEARCH_BASE
+from entrez_settings import ENTREZ_UTIL_API_KEY, ENTREZ_URL_ESEARCH_BASE
 from utils. msg_util import *
 
 class PubmedSearchResult:
@@ -22,6 +22,15 @@ class PubmedSearchResult:
 
         self.parse_pubmed_json(json_str)
 
+    def has_err(self):
+        if len(self.err_msgs)==0:
+            return False
+        return True
+    
+    def print_errs(self):
+        for e in self.err_msgs:
+            msg(e)
+            
     def add_err_msg(self, msg_str):
         msg(msg_str)
         self.err_msgs.append(msg_str)
@@ -46,11 +55,11 @@ class PubmedSearchResult:
         try:
             self.num_results = int(self.pubmed_json['result']['Count'])
         except:
+            self.num_results = 0
             self.add_err_msg('parse_pubmed_json. failed to find result count')
             return 
             
         if self.num_results <= 0:
-            self.add_err_msg('parse_pubmed_json. No results')
             return
             
         try:
@@ -64,17 +73,30 @@ class PubmedSearchResult:
 def search_by_author(author_name, result_dir):
     search_by_author_list(author_names=[author_name])
     
-def search_by_author_list(author_names=["Sanes R"], return_max=300):
+def search_by_author_list(author_names=["Sanes R"], start_year=None, return_max=300):
 
     #if not os.path.isdir(result_dir):
     #    os.makedirs(result_dir)
     
     fmt_authors = []
     author_names = map(lambda x: x.strip(), author_names)
-    for a in author_names:
-        fmt_authors.append('%s[Author]' % a.strip())
     
-    search_term = ' AND '.join(fmt_authors)
+    
+    for idx, a in enumerate(author_names):
+        if idx==0 and start_year is not None:
+            fmt_authors.append('%s[Author])' % a.strip())
+        else:
+            fmt_authors.append('%s[Author]' % a.strip())
+    authors_search_term = ' AND '.join(fmt_authors)
+    
+    if start_year:
+        search_term = """((("%s/01/01"[Date - Publication] : "3000/01/01"[Date - Publication])) AND %s""" % (start_year, authors_search_term )
+    else:
+        search_term = authors_search_term
+    
+    #search_term = """((("2012/01/01"[Date - Publication] : "3000/01/01"[Date - Publication])) AND Sanes JR[Author]) AND Chen[Author]"""
+
+    
     msg('search_term: %s' % search_term)
     
     # parameters for pulling this pubmed article in JSON format
@@ -86,7 +108,7 @@ def search_by_author_list(author_names=["Sanes R"], return_max=300):
                 , 'term' : search_term
                 }) 
 
-    url_str = '%s?%s' % (ENTREZ_URL_SEARCH_BASE, params)
+    url_str = '%s?%s' % (ENTREZ_URL_ESEARCH_BASE, params)
 
     msg('search url: %s' % url_str)
 
@@ -104,7 +126,8 @@ def search_by_author_list(author_names=["Sanes R"], return_max=300):
     
 if __name__=='__main__':
     #search_by_author(author_name="Sanes JR", result_dir='sanes_pubs')
-    search_by_author_list(author_names=['Finski', 'MacBeath'])#, result_dir='test')
+    #search_by_author_list(author_names=['Finski', 'MacBeath'])#, result_dir='test')
+    search_by_author_list(author_names=["Sanes JR", "Chen"])#, start_year='2012')
     #search_by_author(author_name="Sanes JR", result_dir='test')
     #Apel
     
