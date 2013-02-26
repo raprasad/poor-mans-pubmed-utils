@@ -14,12 +14,12 @@ class PubmedSearchResult:
         - result count
         - list of PubMed IDs 
     """
-    def __init__(self, json_str):
+    def __init__(self, json_str, pubmed_query_string=''):
         self.pubmed_json = None
         self.num_results = 0
         self.pubmed_ids = []
         self.err_msgs = []
-
+        self.pubmed_query_string = pubmed_query_string
         self.parse_pubmed_json(json_str)
 
     def has_err(self):
@@ -73,7 +73,8 @@ class PubmedSearchResult:
 def search_by_author(author_name, result_dir):
     search_by_author_list(author_names=[author_name])
     
-def search_by_author_list(author_names=["Sanes R"], start_year=None, return_max=300):
+    
+def search_by_author_list(author_names=["Sanes R"], start_year=None, end_year=None, return_max=300):
 
     #if not os.path.isdir(result_dir):
     #    os.makedirs(result_dir)
@@ -83,6 +84,7 @@ def search_by_author_list(author_names=["Sanes R"], start_year=None, return_max=
     
     
     for idx, a in enumerate(author_names):
+        
         if idx==0 and start_year is not None:
             fmt_authors.append('%s[Author])' % a.strip())
         else:
@@ -93,7 +95,11 @@ def search_by_author_list(author_names=["Sanes R"], start_year=None, return_max=
         search_term = """((("%s/01/01"[Date - Publication] : "3000/01/01"[Date - Publication])) AND %s""" % (start_year, authors_search_term )
     else:
         search_term = authors_search_term
-    
+        
+    if end_year:
+        end_year_fmt = '"%s/01/01"[Date - Publication]' % (end_year) 
+        search_term = search_term.replace('"3000/01/01"[Date - Publication]', end_year_fmt )
+    print search_term
     #search_term = """((("2012/01/01"[Date - Publication] : "3000/01/01"[Date - Publication])) AND Sanes JR[Author]) AND Chen[Author]"""
 
     
@@ -116,9 +122,9 @@ def search_by_author_list(author_names=["Sanes R"], start_year=None, return_max=
     f = urllib.urlopen(url_str)
 
     # read in content
-    pubmed_str = f.read()
+    pubmed_json_str = f.read()
 
-    sr = PubmedSearchResult(pubmed_str)
+    sr = PubmedSearchResult(pubmed_json_str, pubmed_query_string=search_term)
 
     #print sr.pubmed_ids
     return sr
