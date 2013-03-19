@@ -20,7 +20,7 @@ def pull_article_by_pmid(pubmed_id):
 
     # read in content
     pubmed_str = f.read()
-    print pubmed_str
+    #print pubmed_str
     # convert to JSON
     #pubmed_json = json.loads(pubmed_str)
 
