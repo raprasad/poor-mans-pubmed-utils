@@ -5,7 +5,8 @@ esearch function
 import json
 import urllib
 import pprint
-from entrez_settings import ENTREZ_UTIL_API_KEY, ENTREZ_URL_ESEARCH_BASE
+from entrez_settings import ENTREZ_UTIL_API_KEY, ENTREZ_URL_ESEARCH_BASE, PROXIES
+
 from utils. msg_util import *
 
 class PubmedSearchResult:
@@ -119,7 +120,7 @@ def search_by_author_list(author_names=["Sanes R"], start_year=None, end_year=No
     msg('search url: %s' % url_str)
 
     # open url
-    f = urllib.urlopen(url_str)
+    f = urllib.urlopen(url_str, proxies=PROXIES)
 
     # read in content
     pubmed_json_str = f.read()

@@ -1,7 +1,7 @@
 import sys
 import json
 import pprint, urllib
-from entrez_settings import ENTREZ_UTIL_API_KEY, ENTREZ_URL_EFETCH_BASE
+from entrez_settings import ENTREZ_UTIL_API_KEY, ENTREZ_URL_EFETCH_BASE, PROXIES
 from utils.msg_util import *
 
 def pull_article_by_pmid(pubmed_id):
@@ -16,7 +16,7 @@ def pull_article_by_pmid(pubmed_id):
     msg(url_str)
 
     # open url
-    f = urllib.urlopen(url_str)
+    f = urllib.urlopen(url_str, proxies=PROXIES)
 
     # read in content
     pubmed_str = f.read()
